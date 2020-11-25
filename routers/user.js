@@ -25,39 +25,38 @@ router.post('/create', (req, res, next) => {
     })
     return
   }
-  User.findOne({email: email.toLowerCase()},(err, foundUser)=>{
-    if(err) {
-      res.status(500).json({ok:false, error: err})
-      return
-    } 
-    if(foundUser) {
-      res.json({ok:false, error: 'The email already exists.'})
-      return
-    }
-    bcrypt.hash(password,10,(err, hash)=>{
-      if(err) {
-        res.status(500).json({ok:false, error: err})
-        return
-      } else {
-        const user = new User({
-          _id: new mongoose.Types.ObjectId(),
-          email: email.toLowerCase(),
-          password: hash
+
+  User.findOne({email: email.toLowerCase()})
+    .exec()
+    .then(
+      (foundUser)=>{
+        if(foundUser) {
+          res.json({ok:false, error: 'The email already exists.'})
+          return
+        }
+        bcrypt.hash(password,10,(err, hash)=>{
+          if(err) {
+            res.status(500).json({ok:false, error: err})
+            return
+          }
+          const user = new User({
+            _id: new mongoose.Types.ObjectId(),
+            email: email.toLowerCase(),
+            password: hash
+          })
+          user
+          .save()
+          .then(()=>{
+            res.json({
+              ok: true,
+              email: email
+            })
+          })
+          .catch((err)=>{res.status(500).json({ok: false,error: err})})
         })
-        
-        user
-        .save()
-        .then((result)=> {
-          res.json({
-            ok: true,
-            user: user
-        })
-      })
-      .catch((err)=>{
-        res.status(500).json({ok: false,error: err})})
       }
-    })
-  })
+    )
+    .catch((err)=>{res.status(500).json({ok: false,error: err})})
 })
 
 router.patch('/:id',(req, res, next)=> {
