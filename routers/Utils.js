@@ -17,7 +17,7 @@ const Utils = {
     if(!pass) return false
     if(typeof(pass)!=='string') return false
     if(pass !== pass.trim()) return false
-    if(pass.length <=8) return false
+    if(pass.length <8) return false
     return true
   }
 }

@@ -5,15 +5,11 @@ const mongoose = require('mongoose')
 const Utils = require('./Utils')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
+const auth = require('../middle/auth')
 
-router.get('/:id', (req, res, next) => {
-  const id = req.params.id
-  User.findById(id)
-    .exec()
-    .then((user)=>{
-      res.status(200).json(user)
-    })
-    .catch((err)=>{res.status(500).json({error: err})})
+router.get('/haha/:id', auth, (req, res, next) => {
+  res.json({message:"good"})
+  
 })
 
 router.post('/login',(req, res, next)=> {
@@ -64,6 +60,8 @@ router.post('/login',(req, res, next)=> {
 router.post('/create', (req, res, next) => {
   const email = req.body.email
   const password = req.body.password
+  console.log(Utils.ValidateEmailFormat(email) + "+"+Utils.ValidatePasswordFormat(password))
+  
   if(!Utils.ValidateEmailFormat(email) || !Utils.ValidatePasswordFormat(password)) {
     res.json({
       ok: false,
