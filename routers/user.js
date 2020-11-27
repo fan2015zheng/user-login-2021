@@ -16,7 +16,12 @@ router.get('/isLoggedIn', auth, (req, res, next) => {
 })
 
 router.get('/logout',auth, (req, res, next) => {
-  res.clearCookie("access-token")
+  res.cookie("access-token","deleted",{
+    maxAge: -24*60*60*1000,
+    secure: true,   //Chrome only allow https for sameSite=None
+    sameSite: "None",  //accept 3rd party cookies
+    httpOnly: true
+  })
   res.end()
 })
 
