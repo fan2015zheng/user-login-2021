@@ -56,8 +56,8 @@ router.post('/login',(req, res, next)=> {
         })
         res.cookie("access-token",token,{
           maxAge: 24*60*60*1000,
-          secure: true,
-          sameSite: "lax",
+          secure: true,   //Chrome only allow https for sameSite=None
+          sameSite: "None",  //accept 3rd party cookies
           httpOnly: true
         })
         res.json({
