@@ -56,7 +56,7 @@ router.post('/login',(req, res, next)=> {
         })
         res.cookie("access-token",token,{
           maxAge: 24*60*60*1000,
-          secure: false,
+          secure: true,
           sameSite: "lax",
           httpOnly: true
         })
