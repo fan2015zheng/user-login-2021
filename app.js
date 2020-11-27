@@ -18,10 +18,13 @@ app.use(morgan('dev'))
 app.use(bodyParser.urlencoded({extended: false}))
 app.use(bodyParser.json())
 
+
+const originUW = "https://letter.uwmadison.org"
+const originLocal = "http://localhost:3000"
 //CORS
 app.use((req, res, next)=>{
   //* can be replaced with 'http://uwmadison.org' but it only protect browser access but not postman etc
-  res.header('Access-Control-Allow-Origin', 'http://localhost:3000')  
+  res.header('Access-Control-Allow-Origin', originUW)  
   res.header('Access-Control-Allow-Credentials',true)
   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization')
 
