@@ -5,6 +5,7 @@ const morgan = require('morgan')
 const bodyParser = require('body-parser')
 const mongoose = require('mongoose')
 const dotenv = require('dotenv')
+const cookieParser = require('cookie-parser')
 
 if(!process.env.heroku) {
   dotenv.config()
@@ -12,6 +13,7 @@ if(!process.env.heroku) {
 const mongoUrl = `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASS}@free2.kq8hz.mongodb.net/Login?retryWrites=true&w=majority`
 mongoose.connect(mongoUrl,{ useNewUrlParser: true })
 
+app.use(cookieParser())
 app.use(morgan('dev'))
 app.use(bodyParser.urlencoded({extended: false}))
 app.use(bodyParser.json())
@@ -19,7 +21,8 @@ app.use(bodyParser.json())
 //CORS
 app.use((req, res, next)=>{
   //* can be replaced with 'http://uwmadison.org' but it only protect browser access but not postman etc
-  res.header('Access-Control-Allow-Origin', '*')  
+  res.header('Access-Control-Allow-Origin', 'http://localhost:3000')  
+  res.header('Access-Control-Allow-Credentials',true)
   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization')
 
   //browser always send an 'options' request to see what type of http method it can request

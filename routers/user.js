@@ -7,9 +7,17 @@ const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const auth = require('../middle/auth')
 
-router.get('/haha/:id', auth, (req, res, next) => {
-  res.json({message:"good"})
-  
+router.get('/isLoggedIn', auth, (req, res, next) => {
+  if(!req.userData) {
+    res.json({ok:false})
+    return
+  }
+  res.json({ok:true})
+})
+
+router.get('/logout',auth, (req, res, next) => {
+  res.clearCookie("access-token")
+  res.end()
 })
 
 router.post('/login',(req, res, next)=> {
@@ -46,7 +54,12 @@ router.post('/login',(req, res, next)=> {
         },process.env.JWT_SECRET,{
           expiresIn: '1d'
         })
-
+        res.cookie("access-token",token,{
+          maxAge: 24*60*60*1000,
+          secure: false,
+          sameSite: "lax",
+          httpOnly: true
+        })
         res.json({
           ok:true,
           token: token
@@ -60,7 +73,6 @@ router.post('/login',(req, res, next)=> {
 router.post('/create', (req, res, next) => {
   const email = req.body.email
   const password = req.body.password
-  console.log(Utils.ValidateEmailFormat(email) + "+"+Utils.ValidatePasswordFormat(password))
   
   if(!Utils.ValidateEmailFormat(email) || !Utils.ValidatePasswordFormat(password)) {
     res.json({
@@ -108,7 +120,6 @@ router.patch('/:id',(req, res, next)=> {
   User.findById(id)
     .exec()
     .then((user)=>{
-      console.log(user)
       res.status(200).json(user)
     })
     .catch((err)=>{res.status(500).json({error: err})})
