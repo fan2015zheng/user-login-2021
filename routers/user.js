@@ -6,6 +6,7 @@ const Utils = require('./Utils')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const auth = require('../middle/auth')
+const nodemailer = require('nodemailer')
 
 router.get('/isLoggedIn', auth, (req, res, next) => {
   if(!req.userData) {
@@ -51,6 +52,10 @@ router.post('/login',(req, res, next)=> {
         if(!isMatch) {
           res.json({ok:false, error: 'Login failed.'})
         return
+        }
+        if(!user.isEmailConfirmed) {
+          res.json({ok:false, error: 'Please confirm email before login'})
+          return
         }
         
         const token = jwt.sign({
@@ -108,6 +113,7 @@ router.post('/create', (req, res, next) => {
           user
           .save()
           .then(()=>{
+            sendEmail(email)
             res.json({
               ok: true,
               email: email
@@ -115,26 +121,53 @@ router.post('/create', (req, res, next) => {
           })
           .catch((err)=>{res.status(500).json({ok: false,error: err})})
         })
+
       }
     )
     .catch((err)=>{res.status(500).json({ok: false,error: err})})
 })
 
-router.patch('/:id',(req, res, next)=> {
-  const id = req.params.id
-  User.findById(id)
-    .exec()
-    .then((user)=>{
-      res.status(200).json(user)
-    })
-    .catch((err)=>{res.status(500).json({error: err})})
-})
-
-router.delete('/:id',(req, res, next)=> {
-  const id = req.params.id
-  res.status(200).json({
-    message: `DELETE /user/${id}`
-  })
+router.get('/confirm/:token',(req, res, next)=> {
+  const token = req.params.token
+  try {
+    const oUser = jwt.verify(token, process.env.GMAIL_SECRET)
+    const email = oUser.email
+    User.findOne({email:email.toLowerCase()})
+      .exec()
+      .then((user)=>{
+        user.isEmailConfirmed = true
+        user.save()
+        res.send({ok:true})
+      })
+      .catch((err)=>{res.send({ok:false})})
+  } catch (e) {
+    res.send("Cannot confirm email.")
+  }
 })
 
 module.exports = router
+
+
+function sendEmail(toEmail) {
+
+  const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: process.env.GMAIL,
+      pass: process.env.GPASS
+    }
+  })
+
+  jwt.sign({email: toEmail},process.env.GMAIL_SECRET,
+   { expiresIn: '1d'}, (err, token)=> {
+
+      const url = `${Utils.Domain()}/user/confirm/${token}`
+      transporter.sendMail({
+        from: process.env.GMAIL,
+        to: toEmail,
+        subject: 'Write a Letter to a Friend',
+        html: `<a href="${url}">Verify your write a letter account</a>`
+      })
+   }
+  )
+}

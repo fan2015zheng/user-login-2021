@@ -19,6 +19,15 @@ const Utils = {
     if(pass !== pass.trim()) return false
     if(pass.length <8) return false
     return true
+  },
+
+  IsProduction: true,
+  Domain: ()=> {
+    if(this.IsProduction) {
+      return "https://login2021.herokuapp.com"
+    } else {
+      return "http://localhost:5000"
+    }
   }
 }
 
