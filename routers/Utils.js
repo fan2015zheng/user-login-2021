@@ -20,10 +20,8 @@ const Utils = {
     if(pass.length <8) return false
     return true
   },
-
-  IsProduction: true,
   Domain: ()=> {
-    if(this.IsProduction) {
+    if(process.env.heroku) {
       return "https://login2021.herokuapp.com"
     } else {
       return "http://localhost:5000"
